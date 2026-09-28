@@ -1,6 +1,6 @@
 (() => {
   const KEY = 'threadboard.v1';
-  const CONFIRMED_KEY = 'threadboard.deleteConfirmed';
+  const SKIP_CONFIRM_KEY = 'threadboard.skipDeleteConfirm';
   const COLORS = ['yellow', 'pink', 'blue', 'green', 'lilac'];
   const viewport = document.getElementById('viewport');
   const world = document.getElementById('world');
@@ -15,6 +15,7 @@
   const confirmDialog = document.getElementById('confirmDialog');
   const confirmTitle = document.getElementById('confirmTitle');
   const confirmBody = document.getElementById('confirmBody');
+  const confirmSkip = document.getElementById('confirmSkip');
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
   const sample = () => {
     const a = uid(), b = uid(), c = uid();
@@ -156,16 +157,16 @@
     renderLinks();save();
   }
   function confirmDelete(kind,run) {
-    let asked=false;
-    try {asked=localStorage.getItem(CONFIRMED_KEY)==='1';} catch {asked=true;}
-    if(asked) {run();return;}
+    let skip=false;
+    try {skip=localStorage.getItem(SKIP_CONFIRM_KEY)==='1';} catch {skip=true;}
+    if(skip) {run();return;}
     const note=kind==='note';
     confirmTitle.textContent=note?'Delete this note?':'Delete this string?';
-    confirmBody.textContent=note?'Its strings come off with it. This cannot be undone.':'The notes it ties stay where they are. This cannot be undone.';
-    confirmDialog.returnValue='';
+    confirmBody.textContent=note?'Its strings come off with it.':'The notes it ties stay where they are.';
+    confirmSkip.checked=false;confirmDialog.returnValue='';
     confirmDialog.addEventListener('close',()=>{
       if(confirmDialog.returnValue!=='ok')return;
-      try {localStorage.setItem(CONFIRMED_KEY,'1');} catch {}
+      if(confirmSkip.checked) {try {localStorage.setItem(SKIP_CONFIRM_KEY,'1');} catch {}}
       run();
     },{once:true});
     confirmDialog.showModal();
