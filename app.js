@@ -223,7 +223,7 @@
     if(active.type==='wire') {
       const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.note');
       if(target && target.dataset.id!==pending) connect(pending,target.dataset.id);
-    } else if(active.type==='move'||active.type==='resize') save();
+    } else if(active.type==='move'||active.type==='resize') {save();commit();}
     viewport.classList.remove('panning');active=null;
   });
   window.addEventListener('pointercancel',()=>{active=null;viewport.classList.remove('panning');});
