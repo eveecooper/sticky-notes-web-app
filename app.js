@@ -1,5 +1,6 @@
 (() => {
   const KEY = 'threadboard.v1';
+  const CONFIRMED_KEY = 'threadboard.deleteConfirmed';
   const COLORS = ['yellow', 'pink', 'blue', 'green', 'lilac'];
   const viewport = document.getElementById('viewport');
   const world = document.getElementById('world');
@@ -9,6 +10,11 @@
   const zoomValue = document.getElementById('zoomValue');
   const status = document.getElementById('saveStatus');
   const helpDialog = document.getElementById('helpDialog');
+  const removeButton = document.getElementById('removeButton');
+  const removeHint = document.getElementById('removeHint');
+  const confirmDialog = document.getElementById('confirmDialog');
+  const confirmTitle = document.getElementById('confirmTitle');
+  const confirmBody = document.getElementById('confirmBody');
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()));
   const sample = () => {
     const a = uid(), b = uid(), c = uid();
@@ -26,6 +32,7 @@
   let scale = 1, panX = 0, panY = 0;
   let active = null, pending = null, pointerWorld = null;
   let selectedNote = null, selectedLink = null, openMenu = null, saveTimer = null;
+  let removing = false;
   const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
   const noteById = id => data.notes.find(n => n.id === id);
   const save = () => {
@@ -54,11 +61,12 @@
       if(!from||!to) continue;
       const a=pinPoint(from),b=pinPoint(to), d=`M ${a.x} ${a.y} L ${b.x} ${b.y}`;
       const g=document.createElementNS(ns,'g');
-      g.setAttribute('class',`string-group${selectedLink===link.id?' selected':''}`);
+      g.setAttribute('class',`string-group${selectedLink===link.id?' selected':''}${removing?' removable':''}`);
       g.append(path(d,'string-shadow'),path(d,'string-line'));
       const hit=path(d,'string-hit');
       hit.addEventListener('pointerdown',e=>{
         e.stopPropagation(); e.preventDefault();
+        if(removing) {confirmDelete('link',()=>removeLink(link.id));return;}
         selectedLink=link.id;selectedNote=null;openMenu=null;render();
       });
       g.append(hit);svg.append(g);
@@ -73,9 +81,10 @@
     notesLayer.replaceChildren();
     for(const n of data.notes) {
       const el=document.createElement('article');
-      el.className=`note ${COLORS.includes(n.color)?n.color:'yellow'}${selectedNote===n.id?' selected':''}`;
+      el.className=`note ${COLORS.includes(n.color)?n.color:'yellow'}${selectedNote===n.id?' selected':''}${removing?' removable':''}`;
       el.style.cssText=`left:${n.x}px;top:${n.y}px;width:${n.w}px;height:${n.h}px`;
       el.dataset.id=n.id;
+      if(removing) el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();confirmDelete('note',()=>removeNote(n.id));});
       const head=document.createElement('div');head.className='note-header';head.title='Drag to move';
       head.addEventListener('pointerdown',e=>{
         if(e.target.closest('button')) return;
@@ -108,7 +117,7 @@
         }
         menu.append(swatches);
         const del=document.createElement('button');del.className='menu-delete';del.type='button';del.textContent='Delete note';
-        del.addEventListener('click',e=>{e.stopPropagation();removeNote(n.id);});menu.append(del);head.append(menu);
+        del.addEventListener('click',e=>{e.stopPropagation();confirmDelete('note',()=>removeNote(n.id));});menu.append(del);head.append(menu);
       }
       el.append(head);
       const text=document.createElement('textarea');text.className='note-text';text.placeholder='Write an idea…';text.value=n.text||'';text.setAttribute('aria-label','Note text');
@@ -140,6 +149,32 @@
   function removeNote(id) {
     data.notes=data.notes.filter(n=>n.id!==id);data.links=data.links.filter(l=>l.from!==id&&l.to!==id);
     if(pending===id) cancelConnection();selectedNote=null;openMenu=null;render();save();
+  }
+  function removeLink(id) {
+    data.links=data.links.filter(l=>l.id!==id);
+    if(selectedLink===id) selectedLink=null;
+    renderLinks();save();
+  }
+  function confirmDelete(kind,run) {
+    let asked=false;
+    try {asked=localStorage.getItem(CONFIRMED_KEY)==='1';} catch {asked=true;}
+    if(asked) {run();return;}
+    const note=kind==='note';
+    confirmTitle.textContent=note?'Delete this note?':'Delete this string?';
+    confirmBody.textContent=note?'Its strings come off with it. This cannot be undone.':'The notes it ties stay where they are. This cannot be undone.';
+    confirmDialog.returnValue='';
+    confirmDialog.addEventListener('close',()=>{
+      if(confirmDialog.returnValue!=='ok')return;
+      try {localStorage.setItem(CONFIRMED_KEY,'1');} catch {}
+      run();
+    },{once:true});
+    confirmDialog.showModal();
+  }
+  function setRemoveMode(on) {
+    if(on&&pending) cancelConnection();
+    removing=on;selectedNote=null;selectedLink=null;openMenu=null;
+    removeButton.classList.toggle('active',on);removeButton.setAttribute('aria-pressed',String(on));
+    removeHint.hidden=!on;viewport.classList.toggle('removing',on);render();
   }
   viewport.addEventListener('pointerdown',e=>{
     if(e.button!==0 || e.target.closest?.('.note') || e.target.closest?.('.string-hit'))return;
@@ -192,7 +227,9 @@
   document.getElementById('zoomIn').addEventListener('click',()=>zoomAt(scale*1.2,viewport.clientWidth/2,viewport.clientHeight/2));
   document.getElementById('zoomOut').addEventListener('click',()=>zoomAt(scale/1.2,viewport.clientWidth/2,viewport.clientHeight/2));
   document.getElementById('resetView').addEventListener('click',fitView);
+  removeButton.addEventListener('click',()=>setRemoveMode(!removing));
   document.querySelectorAll('.add-note').forEach(button=>button.addEventListener('click',()=>{
+    if(removing) setRemoveMode(false);
     const center={x:(viewport.clientWidth/2-panX)/scale,y:(viewport.clientHeight/2-panY)/scale};
     const offset=(data.notes.length%4)*22;
     const n={id:uid(),x:clamp(center.x-125+offset,0,9700),y:clamp(center.y-100+offset,0,9700),w:250,h:200,color:button.dataset.color,text:''};
@@ -201,11 +238,13 @@
   }));
   document.getElementById('helpButton').addEventListener('click',()=>helpDialog.showModal());
   document.addEventListener('keydown',e=>{
+    if(confirmDialog.open)return;
     if(e.key==='Escape'&&pending){cancelConnection();return;}
+    if(e.key==='Escape'&&removing){setRemoveMode(false);return;}
     const typing=e.target.closest?.('textarea, input, [contenteditable]');
     if(typing||helpDialog.open)return;
-    if((e.key==='Delete'||e.key==='Backspace')&&selectedLink){data.links=data.links.filter(l=>l.id!==selectedLink);selectedLink=null;renderLinks();save();}
-    else if((e.key==='Delete'||e.key==='Backspace')&&selectedNote){removeNote(selectedNote);}
+    if((e.key==='Delete'||e.key==='Backspace')&&selectedLink){const id=selectedLink;confirmDelete('link',()=>removeLink(id));}
+    else if((e.key==='Delete'||e.key==='Backspace')&&selectedNote){const id=selectedNote;confirmDelete('note',()=>removeNote(id));}
     else if(e.key.toLowerCase()==='n'&&!e.ctrlKey&&!e.metaKey){document.querySelector('.add-note.yellow').click();}
   });
   render();fitView();

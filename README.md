@@ -17,6 +17,7 @@ Open [http://localhost:4173](http://localhost:4173) in your browser. Stop the se
 - Add a colored note with the left toolbar. Type directly in a note.
 - Drag a note by its top edge. Resize it from the bottom right corner.
 - Click or drag from a pin to another note's pin to connect notes. Click a string and press Delete to remove it.
+- Click ✕ Remove in the left toolbar to start removing, then click any note or string to delete it. Press Esc or ✕ again to stop. The first delete asks you to confirm with OK.
 - Drag empty board space to pan. Scroll to pan, or use Ctrl/⌘ + scroll or the buttons to zoom.
 - Use the note's ⋯ menu to change color or delete it. Press N to add a yellow note.
 

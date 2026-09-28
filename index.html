@@ -23,6 +23,7 @@
         <div id="notes" class="notes"></div>
       </div>
       <div id="connectionHint" class="connection-hint" hidden>Choose another pin to tie the string · Esc to cancel</div>
+      <div id="removeHint" class="connection-hint remove-hint" hidden>Click a note or string to delete · Esc to finish</div>
       <div class="board-controls" aria-label="Board controls">
         <button id="zoomOut" type="button" aria-label="Zoom out" title="Zoom out">−</button>
         <span id="zoomValue">100%</span>
@@ -33,13 +34,16 @@
       <div class="board-hint">Drag the board to move around <span>·</span> Scroll to pan <span>·</span> Ctrl + scroll to zoom</div>
     </section>
 
-    <aside class="tool-rail" aria-label="Create notes">
+    <aside class="tool-rail" aria-label="Board tools">
       <div class="rail-label">ADD NOTE</div>
       <button class="add-note yellow" data-color="yellow" type="button" aria-label="Add yellow note" title="Yellow note"><span>＋</span></button>
       <button class="add-note pink" data-color="pink" type="button" aria-label="Add pink note" title="Pink note"><span>＋</span></button>
       <button class="add-note blue" data-color="blue" type="button" aria-label="Add blue note" title="Blue note"><span>＋</span></button>
       <button class="add-note green" data-color="green" type="button" aria-label="Add green note" title="Green note"><span>＋</span></button>
       <button class="add-note lilac" data-color="lilac" type="button" aria-label="Add lilac note" title="Lilac note"><span>＋</span></button>
+      <div class="rail-divider" aria-hidden="true"></div>
+      <div class="rail-label">REMOVE</div>
+      <button id="removeButton" class="remove-note" type="button" aria-pressed="false" aria-label="Remove notes and strings" title="Remove a note or string"><span>✕</span></button>
     </aside>
 
     <dialog id="helpDialog" class="help-dialog">
@@ -49,10 +53,22 @@
           <li><strong>Add a note</strong> with a color button on the left. Type directly into it.</li>
           <li><strong>Move</strong> a note by its top edge; <strong>resize</strong> it from the lower right corner.</li>
           <li><strong>Tie notes together</strong> by clicking one pin, then another. Click a string to select it and press Delete to remove it.</li>
+          <li><strong>Remove</strong> with the ✕ button on the left, then click any note or string. Press Esc when you are done.</li>
           <li><strong>Pan</strong> by dragging empty board space. Use the zoom controls or Ctrl/⌘ + scroll to zoom.</li>
           <li>Notes and strings save automatically in this browser.</li>
         </ul>
         <button class="dialog-done" type="submit">Got it</button>
+      </form>
+    </dialog>
+
+    <dialog id="confirmDialog" class="help-dialog confirm-dialog">
+      <form method="dialog">
+        <div class="dialog-head"><h2 id="confirmTitle">Delete this note?</h2></div>
+        <p id="confirmBody">Its strings come off with it. This cannot be undone.</p>
+        <div class="dialog-actions">
+          <button class="dialog-cancel" type="submit" value="cancel">Cancel</button>
+          <button class="dialog-done" type="submit" value="ok">OK</button>
+        </div>
       </form>
     </dialog>
   </main>
