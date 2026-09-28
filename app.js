@@ -203,7 +203,7 @@
     removeHint.hidden=!on;viewport.classList.toggle('removing',on);render();
   }
   viewport.addEventListener('pointerdown',e=>{
-    if(e.button!==0 || e.target.closest?.('.note') || e.target.closest?.('.string-hit'))return;
+    if(e.button!==0 || e.target.closest?.('.note') || e.target.closest?.('.string-hit') || e.target.closest?.('.board-controls'))return;
     if(pending) {cancelConnection();return;}
     selectedNote=null;selectedLink=null;openMenu=null;render();
     active={type:'pan',pointerId:e.pointerId,start:screenPoint(e),x:panX,y:panY};viewport.classList.add('panning');
@@ -260,7 +260,7 @@
     if(removing) setRemoveMode(false);
     const center={x:(viewport.clientWidth/2-panX)/scale,y:(viewport.clientHeight/2-panY)/scale};
     const offset=(data.notes.length%4)*22;
-    const n={id:uid(),x:clamp(center.x-125+offset,0,9700),y:clamp(center.y-100+offset,0,9700),w:250,h:200,color:button.dataset.color,text:''};
+    const n={id:uid(),x:clamp(center.x-105+offset,0,9700),y:clamp(center.y-85+offset,0,9700),w:210,h:170,color:button.dataset.color,text:''};
     data.notes.push(n);selectedNote=n.id;selectedLink=null;openMenu=null;render();save();commit();
     notesLayer.lastElementChild?.querySelector('textarea')?.focus();
   }));
