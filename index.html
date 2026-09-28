@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#c39a6b" />
+  <title>Threadboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✳</span><span>Threadboard</span><span class="brand-divider"></span><span class="brand-sub">Your thinking space</span></div>
+      <div class="top-actions">
+        <span id="saveStatus" class="save-status">Saved on this device</span>
+        <button id="helpButton" class="icon-button" type="button" aria-label="How to use" title="How to use">?</button>
+      </div>
+    </header>
+
+    <section id="viewport" class="viewport" aria-label="Idea board">
+      <div id="world" class="world">
+        <svg id="strings" class="strings" width="10000" height="10000" viewBox="0 0 10000 10000" aria-label="Connections between notes"></svg>
+        <div id="notes" class="notes"></div>
+      </div>
+      <div id="connectionHint" class="connection-hint" hidden>Choose another pin to tie the string · Esc to cancel</div>
+      <div class="board-controls" aria-label="Board controls">
+        <button id="zoomOut" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+        <span id="zoomValue">100%</span>
+        <button id="zoomIn" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+        <span class="control-divider"></span>
+        <button id="resetView" class="fit-button" type="button" title="Fit notes in view">Fit view</button>
+      </div>
+      <div class="board-hint">Drag the board to move around <span>·</span> Scroll to pan <span>·</span> Ctrl + scroll to zoom</div>
+    </section>
+
+    <aside class="tool-rail" aria-label="Create notes">
+      <div class="rail-label">ADD NOTE</div>
+      <button class="add-note yellow" data-color="yellow" type="button" aria-label="Add yellow note" title="Yellow note"><span>＋</span></button>
+      <button class="add-note pink" data-color="pink" type="button" aria-label="Add pink note" title="Pink note"><span>＋</span></button>
+      <button class="add-note blue" data-color="blue" type="button" aria-label="Add blue note" title="Blue note"><span>＋</span></button>
+      <button class="add-note green" data-color="green" type="button" aria-label="Add green note" title="Green note"><span>＋</span></button>
+      <button class="add-note lilac" data-color="lilac" type="button" aria-label="Add lilac note" title="Lilac note"><span>＋</span></button>
+    </aside>
+
+    <dialog id="helpDialog" class="help-dialog">
+      <form method="dialog">
+        <div class="dialog-head"><h2>How to use Threadboard</h2><button class="dialog-close" aria-label="Close" type="submit">×</button></div>
+        <ul>
+          <li><strong>Add a note</strong> with a color button on the left. Type directly into it.</li>
+          <li><strong>Move</strong> a note by its top edge; <strong>resize</strong> it from the lower right corner.</li>
+          <li><strong>Tie notes together</strong> by clicking one pin, then another. Click a string to select it and press Delete to remove it.</li>
+          <li><strong>Pan</strong> by dragging empty board space. Use the zoom controls or Ctrl/⌘ + scroll to zoom.</li>
+          <li>Notes and strings save automatically in this browser.</li>
+        </ul>
+        <button class="dialog-done" type="submit">Got it</button>
+      </form>
+    </dialog>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>
