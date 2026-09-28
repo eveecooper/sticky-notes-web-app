@@ -34,6 +34,26 @@
   let active = null, pending = null, pointerWorld = null;
   let selectedNote = null, selectedLink = null, openMenu = null, saveTimer = null;
   let removing = false;
+  const HISTORY_MAX = 60;
+  const clone = value => JSON.parse(JSON.stringify(value));
+  let history = [clone(data)], historyAt = 0, historyKey = null, historyStamp = 0;
+  function commit(key) {
+    const now=Date.now(), merge=key&&key===historyKey&&now-historyStamp<900;
+    historyKey=key||null;historyStamp=now;
+    if(merge) {history[historyAt]=clone(data);return;}
+    history=history.slice(0,historyAt+1);history.push(clone(data));
+    if(history.length>HISTORY_MAX) history.shift();
+    historyAt=history.length-1;
+  }
+  function applyHistory(step) {
+    const next=historyAt+step;
+    if(next<0||next>=history.length)return;
+    historyAt=next;data=clone(history[historyAt]);historyKey=null;
+    if(pending) cancelConnection();
+    selectedNote=null;selectedLink=null;openMenu=null;render();save();
+  }
+  const undo = () => applyHistory(-1);
+  const redo = () => applyHistory(1);
   const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
   const noteById = id => data.notes.find(n => n.id === id);
   const save = () => {
