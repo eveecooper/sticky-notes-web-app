@@ -143,7 +143,7 @@
       el.append(head);
       const text=document.createElement('textarea');text.className='note-text';text.placeholder='Write an idea…';text.value=n.text||'';text.setAttribute('aria-label','Note text');
       text.addEventListener('focus',()=>{selectedNote=n.id;selectedLink=null;highlightSelection();});
-      text.addEventListener('input',()=>{n.text=text.value;save();});el.append(text);
+      text.addEventListener('input',()=>{n.text=text.value;save();commit('text:'+n.id);});el.append(text);
       const resize=document.createElement('div');resize.className='resize-handle';resize.title='Resize note';resize.setAttribute('role','button');resize.setAttribute('aria-label','Resize note');
       resize.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();selectNote(n.id);begin(e,'resize',n);});
       el.append(resize);notesLayer.append(el);
