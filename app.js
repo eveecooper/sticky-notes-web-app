@@ -271,6 +271,9 @@
     if(e.key==='Escape'&&removing){setRemoveMode(false);return;}
     const typing=e.target.closest?.('textarea, input, [contenteditable]');
     if(typing||helpDialog.open)return;
+    const mod=e.ctrlKey||e.metaKey;
+    if(mod&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo();return;}
+    if(mod&&e.key.toLowerCase()==='y'){e.preventDefault();redo();return;}
     if((e.key==='Delete'||e.key==='Backspace')&&selectedLink){const id=selectedLink;confirmDelete('link',()=>removeLink(id));}
     else if((e.key==='Delete'||e.key==='Backspace')&&selectedNote){const id=selectedNote;confirmDelete('note',()=>removeNote(id));}
     else if(e.key.toLowerCase()==='n'&&!e.ctrlKey&&!e.metaKey){document.querySelector('.add-note.yellow').click();}
