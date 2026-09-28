@@ -10,6 +10,8 @@
   const zoomValue = document.getElementById('zoomValue');
   const status = document.getElementById('saveStatus');
   const helpDialog = document.getElementById('helpDialog');
+  const undoButton = document.getElementById('undoButton');
+  const redoButton = document.getElementById('redoButton');
   const removeButton = document.getElementById('removeButton');
   const removeHint = document.getElementById('removeHint');
   const confirmDialog = document.getElementById('confirmDialog');
@@ -43,14 +45,17 @@
     if(merge) {history[historyAt]=clone(data);return;}
     history=history.slice(0,historyAt+1);history.push(clone(data));
     if(history.length>HISTORY_MAX) history.shift();
-    historyAt=history.length-1;
+    historyAt=history.length-1;updateHistoryButtons();
   }
   function applyHistory(step) {
     const next=historyAt+step;
     if(next<0||next>=history.length)return;
     historyAt=next;data=clone(history[historyAt]);historyKey=null;
     if(pending) cancelConnection();
-    selectedNote=null;selectedLink=null;openMenu=null;render();save();
+    selectedNote=null;selectedLink=null;openMenu=null;render();save();updateHistoryButtons();
+  }
+  function updateHistoryButtons() {
+    undoButton.disabled=historyAt<=0;redoButton.disabled=historyAt>=history.length-1;
   }
   const undo = () => applyHistory(-1);
   const redo = () => applyHistory(1);
@@ -248,6 +253,8 @@
   document.getElementById('zoomIn').addEventListener('click',()=>zoomAt(scale*1.2,viewport.clientWidth/2,viewport.clientHeight/2));
   document.getElementById('zoomOut').addEventListener('click',()=>zoomAt(scale/1.2,viewport.clientWidth/2,viewport.clientHeight/2));
   document.getElementById('resetView').addEventListener('click',fitView);
+  undoButton.addEventListener('click',undo);
+  redoButton.addEventListener('click',redo);
   removeButton.addEventListener('click',()=>setRemoveMode(!removing));
   document.querySelectorAll('.add-note').forEach(button=>button.addEventListener('click',()=>{
     if(removing) setRemoveMode(false);
@@ -268,6 +275,6 @@
     else if((e.key==='Delete'||e.key==='Backspace')&&selectedNote){const id=selectedNote;confirmDelete('note',()=>removeNote(id));}
     else if(e.key.toLowerCase()==='n'&&!e.ctrlKey&&!e.metaKey){document.querySelector('.add-note.yellow').click();}
   });
-  render();fitView();
+  render();fitView();updateHistoryButtons();
   if(!localStorage.getItem(KEY))save();
 })();
