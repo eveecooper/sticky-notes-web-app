@@ -134,7 +134,7 @@
           const swatch=document.createElement('button');swatch.type='button';swatch.className=`swatch ${color}${n.color===color?' active':''}`;
           swatch.style.setProperty('--paper',getComputedStyle(document.querySelector(`.add-note.${color}`)).getPropertyValue('--paper'));
           swatch.setAttribute('aria-label',`${color} note`);
-          swatch.addEventListener('click',e=>{e.stopPropagation();n.color=color;openMenu=null;render();save();});swatches.append(swatch);
+          swatch.addEventListener('click',e=>{e.stopPropagation();n.color=color;openMenu=null;render();save();commit();});swatches.append(swatch);
         }
         menu.append(swatches);
         const del=document.createElement('button');del.className='menu-delete';del.type='button';del.textContent='Delete note';
@@ -163,18 +163,18 @@
   function cancelConnection() {pending=null;pointerWorld=null;active=null;hint.hidden=true;viewport.classList.remove('connecting');render();}
   function connect(a,b) {
     if(a!==b&&!data.links.some(l=>(l.from===a&&l.to===b)||(l.from===b&&l.to===a))) {
-      data.links.push({id:uid(),from:a,to:b});save();
+      data.links.push({id:uid(),from:a,to:b});save();commit();
     }
     cancelConnection();
   }
   function removeNote(id) {
     data.notes=data.notes.filter(n=>n.id!==id);data.links=data.links.filter(l=>l.from!==id&&l.to!==id);
-    if(pending===id) cancelConnection();selectedNote=null;openMenu=null;render();save();
+    if(pending===id) cancelConnection();selectedNote=null;openMenu=null;render();save();commit();
   }
   function removeLink(id) {
     data.links=data.links.filter(l=>l.id!==id);
     if(selectedLink===id) selectedLink=null;
-    renderLinks();save();
+    renderLinks();save();commit();
   }
   function confirmDelete(kind,run) {
     let skip=false;
@@ -254,7 +254,7 @@
     const center={x:(viewport.clientWidth/2-panX)/scale,y:(viewport.clientHeight/2-panY)/scale};
     const offset=(data.notes.length%4)*22;
     const n={id:uid(),x:clamp(center.x-125+offset,0,9700),y:clamp(center.y-100+offset,0,9700),w:250,h:200,color:button.dataset.color,text:''};
-    data.notes.push(n);selectedNote=n.id;selectedLink=null;openMenu=null;render();save();
+    data.notes.push(n);selectedNote=n.id;selectedLink=null;openMenu=null;render();save();commit();
     notesLayer.lastElementChild?.querySelector('textarea')?.focus();
   }));
   document.getElementById('helpButton').addEventListener('click',()=>helpDialog.showModal());
